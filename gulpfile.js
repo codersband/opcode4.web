@@ -3,14 +3,16 @@
 var gulp = require("gulp"),
     nuget = require("gulp-nuget");
 
-
+var projectName = 'opcode4.web';
+var apiKey = '75af7863-f210-49f5-b26e-163c93f1988d';
 var path = {
     nugetPath: 'D:\\Program Files\\nuget\\nuget.exe',
-    nugetOutPath: 'D:\\Repositories\\Nuget'
+    nugetOutPath: 'D:\\Repositories\\Nuget',
+    nugetSource: 'https://www.nuget.org/api/v2/package'
 }
 
 gulp.task('nuget-pack', function () {
-    return gulp.src('opcode4.web.csproj')
+    return gulp.src(projectName + '.csproj')
         .pipe(nuget.pack({
             nuget: path.nugetPath,
             outputDirectory: path.nugetOutPath, //'./nupkgs/',
@@ -28,3 +30,15 @@ gulp.task('nuget-pack', function () {
             //tool: true
         }));
 });
+
+gulp.task('nuget-push', function() {
+    return gulp.src(projectName + '.csproj')
+        .pipe(nuget.pack({
+            nuget: path.nugetPath,
+            outputDirectory: path.nugetOutPath,
+            exclude: 'gulpfile.js',
+            properties: 'configuration=release',
+            includeReferencedProjects: true,
+        }))
+     .pipe(nuget.push({ source: path.nugetSource, nuget: path.nugetPath, apiKey: apiKey }));
+})

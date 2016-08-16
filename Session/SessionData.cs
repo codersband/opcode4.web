@@ -1,7 +1,8 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Web;
-using opcode4.core.Model;
+using opcode4.core.Model.Log;
 using opcode4.utilities;
 using opcode4.web.Membership;
 
@@ -11,6 +12,12 @@ namespace opcode4.web.Session
     {
         public static void Create(ApplicationUser user)
         {
+            if(string.IsNullOrEmpty(user?.UserName))
+                throw new ArgumentException(nameof(user.UserName));
+
+            if (user.Roles == null)
+                throw new ArgumentException(nameof(user.Roles));
+
             UserId = user.Id;
             UserName = user.UserName;
             UserRoles = user.Roles?.Select(r=>r.Name).ToArray();
@@ -19,30 +26,35 @@ namespace opcode4.web.Session
 
         public static string SessionId => HttpContext.Current.Session.SessionID;
 
-        public static bool IsInitialized => HttpContext.Current.Session["_ActorId"] != null;
+        public static bool IsInitialized => HttpContext.Current.Session["__userRoles__"] != null;
 
-        public static ulong UserId
+        public static long UserId
         {
-            set { HttpContext.Current.Session["_ActorId"] = value; }
-            get { return CommonUtils.Value2uLong(HttpContext.Current.Session["_ActorId"]); }
+            private set { HttpContext.Current.Session["__userId__"] = value; }
+            get { return CommonUtils.Value2Long(HttpContext.Current.Session["__userId__"]); }
         }
 
         public static string UserName
         {
-            private set { HttpContext.Current.Session["_ActorName"] = value; }
-            get { return CommonUtils.Value2Str(HttpContext.Current.Session["_ActorName"]); }
+            private set { HttpContext.Current.Session["__userName__"] = value; }
+            get { return CommonUtils.Value2Str(HttpContext.Current.Session["__userName__"]); }
         }
 
         public static string[] UserRoles
         {
-            private set { HttpContext.Current.Session["UserRoles"] = value; }
-            get { return CommonUtils.Value2StrArray(HttpContext.Current.Session["UserRoles"]); }
+            private set { HttpContext.Current.Session["__userRoles__"] = value; }
+            get { return CommonUtils.Value2StrArray(HttpContext.Current.Session["__userRoles__"]); }
         }
 
-        public static ulong ProviderId
+        public static bool IsInRole(string role)
         {
-            private set { HttpContext.Current.Session["_ProviderId"] = value; }
-            get { return CommonUtils.Value2uLong(HttpContext.Current.Session["_ProviderId"]); }
+            return UserRoles.FirstOrDefault(r => r.Equals(role)) != null;
+        }
+
+        public static long ProviderId
+        {
+            private set { HttpContext.Current.Session["__providerId__"] = value; }
+            get { return CommonUtils.Value2Long(HttpContext.Current.Session["__providerId__"]); }
         }
 
         public static CultureInfo Culture

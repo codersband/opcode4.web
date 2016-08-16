@@ -32,8 +32,8 @@ namespace opcode4.web.Attributes.Http
                 var authType = httpContext.User.Identity.AuthenticationType;
                 if (authType.Equals("NTLM") || authType.Equals("Negotiate"))
                 {
-                    var identity = new CustomIdentity(0, httpContext.User.Identity.Name, 0, new string[0]);
-                    HttpContext.Current.User = Thread.CurrentPrincipal = new CustomPrincipal(identity);
+                    var identity = new CustomIdentity(0, httpContext.User.Identity.Name, 0, new[] { IdentityRoles.ROOT });
+                    HttpContext.Current.User = new CustomPrincipal(identity);
                 }
                 else
                 {

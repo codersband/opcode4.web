@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using opcode4.core.Model.Identity;
+using opcode4.web.Membership;
 using opcode4.web.Response;
 using opcode4.web.Response.Json;
 using opcode4.web.Session;
@@ -32,16 +34,25 @@ namespace opcode4.web.Attributes.Mvc
 
                 if (authType.Equals("NTLM") || authType.Equals("Negotiate"))
                 {
-                    var identity = new CustomIdentity(0, httpContext.User.Identity.Name, 0, new [] { "VIEW" });
+                    var identity = new CustomIdentity(0, httpContext.User.Identity.Name, 0, new [] { IdentityRoles.ROOT });
                     HttpContext.Current.User = new CustomPrincipal(identity);
 
-                    filterContext.Result = new RedirectToRouteResult(
-                        new RouteValueDictionary(
-                            new
-                            {
-                                controller = filterContext.RouteData.Values["controller"],
-                                action = filterContext.RouteData.Values["action"]
-                            }));
+                    if (!httpContext.User.Identity.IsAuthenticated || !SessionData.IsInitialized)
+                    {
+                        SessionData.Create(new ApplicationUser
+                        {
+                            UserName = httpContext.User.Identity.Name,
+                            Roles = new List<IdentityUserRole> { new IdentityUserRole { Name = IdentityRoles.ROOT } }
+                        });
+
+                        filterContext.Result = new RedirectToRouteResult(
+                            new RouteValueDictionary(
+                                new
+                                {
+                                    controller = filterContext.RouteData.Values["controller"],
+                                    action = filterContext.RouteData.Values["action"]
+                                }));
+                    }      
                 }
                 else
                 {

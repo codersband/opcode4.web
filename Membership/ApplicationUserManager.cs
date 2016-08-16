@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
@@ -6,9 +6,9 @@ using Microsoft.Owin;
 
 namespace opcode4.web.Membership
 {
-    public class ApplicationUserManager : UserManager<ApplicationUser, ulong>
+    public class ApplicationUserManager : UserManager<ApplicationUser, long>
     {
-        public ApplicationUserManager(IUserStore<ApplicationUser, ulong> store) : base(store)
+        public ApplicationUserManager(IApplicationIdentityStore store) : base(store)
         {
             this.PasswordHasher = new CustomPasswordHasher();
         }
@@ -24,9 +24,19 @@ namespace opcode4.web.Membership
             return null;
         }
 
+        public async Task<IdentityResult> ChangePasswordAsync(long userId, string newPassword)
+        {
+            var user = await Store.FindByIdAsync(userId);
+            if (user == null)
+                return await new Task<IdentityResult>(() => IdentityResult.Failed());
+
+            var store = Store as IUserPasswordStore<ApplicationUser,long>;
+            return await base.UpdatePassword(store, user, newPassword);
+        }
+
         public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context)
         {
-            var manager = new ApplicationUserManager(context.GetUserManager<IUserPasswordStore<ApplicationUser, ulong>>());
+            var manager = new ApplicationUserManager(context.GetUserManager<IApplicationIdentityStore>());
 
             //manager.UserValidator = new UserValidator<ApplicationUser, ulong>(manager)
             //{
@@ -44,7 +54,7 @@ namespace opcode4.web.Membership
             var dataProtectionProvider = options.DataProtectionProvider;
             if (dataProtectionProvider != null)
             {
-                manager.UserTokenProvider = new DataProtectorTokenProvider<ApplicationUser, ulong>(dataProtectionProvider.Create("ASP.NET Identity"));
+                manager.UserTokenProvider = new DataProtectorTokenProvider<ApplicationUser, long>(dataProtectionProvider.Create("ASP.NET Identity"));
             }
             return manager;
         }

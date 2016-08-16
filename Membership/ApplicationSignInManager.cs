@@ -5,9 +5,9 @@ using Microsoft.Owin.Security;
 
 namespace opcode4.web.Membership
 {
-    public class ApplicationSignInManager : SignInManager<ApplicationUser, ulong>
+    public class ApplicationSignInManager : SignInManager<ApplicationUser, long>
     {
-        public ApplicationSignInManager(UserManager<ApplicationUser, ulong> userManager, IAuthenticationManager authenticationManager) : base(userManager, authenticationManager)
+        public ApplicationSignInManager(UserManager<ApplicationUser, long> userManager, IAuthenticationManager authenticationManager) : base(userManager, authenticationManager)
         {
         }
 
