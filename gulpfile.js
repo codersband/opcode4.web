@@ -31,14 +31,15 @@ gulp.task('nuget-pack', function () {
         }));
 });
 
-gulp.task('nuget-push', function() {
-    return gulp.src(projectName + '.csproj')
-        .pipe(nuget.pack({
-            nuget: path.nugetPath,
-            outputDirectory: path.nugetOutPath,
-            exclude: 'gulpfile.js',
-            properties: 'configuration=release',
-            includeReferencedProjects: true,
-        }))
-     .pipe(nuget.push({ source: path.nugetSource, nuget: path.nugetPath, apiKey: apiKey }));
-})
+gulp.task('nuget-push',
+    function() {
+        return gulp.src(projectName + '.csproj')
+            .pipe(nuget.pack({
+                nuget: path.nugetPath,
+                outputDirectory: path.nugetOutPath,
+                exclude: 'gulpfile.js',
+                //properties: 'configuration=release',
+                includeReferencedProjects: true,
+            }))
+            .pipe(nuget.push({ source: path.nugetSource, nuget: path.nugetPath, apiKey: apiKey }));
+    });

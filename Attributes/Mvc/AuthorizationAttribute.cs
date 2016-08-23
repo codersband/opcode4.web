@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -112,7 +111,7 @@ namespace opcode4.web.Attributes.Mvc
                         status = ResponseStatus.UNAUTHORIZED.ToString(),
                         details = "cannot_process_request"
                     }
-                    // Data = new ErrorData((int)ExceptionCode.Security.AuthenticationError, ResponseStatus.UNAUTHORIZED.ToString(), GetMessage("cannot_process_request"))
+                    // Data = new ErrorDataDto((int)ExceptionCode.Security.AuthenticationError, ResponseStatus.UNAUTHORIZED.ToString(), GetMessage("cannot_process_request"))
                 };
                 //httpContext.Items.Add(SuppressFormsAuthenticationRedirectModule.SuppressFormsAuthenticationKey, "true");
                 //response.End();
